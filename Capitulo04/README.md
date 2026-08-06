@@ -37,7 +37,8 @@ En esta práctica configurarás dos servicios esenciales en un router Cisco simu
 
 ### Acceso requerido
 - Cisco Packet Tracer 8.2 o superior instalado y con licencia activa (requiere cuenta gratuita en **netacad.com**).
-- Archivo de topología de la Práctica 3 (`.pkt`) o el archivo `Lab04_topologia_base.pkt` proporcionado por el instructor.
+- Archivo de topología `Lab04_topologia_base.pkt` proporcionado por el instructor. [Lab04_topologia_base.zip](https://github.com/user-attachments/files/30796908/Lab04_topologia_base.zip)
+
 - Editor de texto para las respuestas analíticas (Notepad++, VS Code, Word o LibreOffice).
 
 ---
@@ -60,30 +61,21 @@ En esta práctica configurarás dos servicios esenciales en un router Cisco simu
 
 La topología que utilizarás tiene la siguiente estructura lógica:
 
-```
-[Internet Cloud]
-      |
-   Fa0/1  (IP Pública: 203.0.113.1/30 — lado ISP: 203.0.113.2/30)
-  [Router0]
-   Fa0/0  (Gateway LAN: 192.168.10.1/24)
-      |
-  [Switch0]
-   /      \
-[PC0]   [PC1]   [Servidor0]
-(DHCP)  (DHCP)  (IP estática: 192.168.10.100/24)
-```
+
+<img width="776" height="644" alt="1 Topologia Inicial" src="https://github.com/user-attachments/assets/fb988de1-0dc8-43f4-ba2f-da3d95ab5e51" />
+
 
 | Dispositivo  | Interfaz | Dirección IP         | Rol                        |
 |--------------|----------|----------------------|----------------------------|
-| Router0      | Fa0/0    | 192.168.10.1/24      | Gateway LAN (inside NAT)   |
-| Router0      | Fa0/1    | 203.0.113.1/30       | Enlace WAN (outside NAT)   |
+| Router0      | Gi0/0    | 192.168.10.1/24      | Gateway LAN (inside NAT)   |
+| Router0      | Gi0/1    | 203.0.113.1/30       | Enlace WAN (outside NAT)   |
 | Servidor0    | NIC      | 192.168.10.100/24    | Servidor web interno       |
 | PC0          | NIC      | Por DHCP             | Host cliente               |
 | PC1          | NIC      | Por DHCP             | Host cliente               |
-| ISP_Router   | Fa0/0    | 203.0.113.2/30       | Simulación de ISP          |
+| ISP_Router   | Gi0/0    | 203.0.113.2/30       | Simulación de ISP          |
 | Servidor_Web | NIC      | 8.8.8.8/8            | Servidor externo simulado  |
 
-> **Nota:** Si el archivo de la Práctica 3 tiene un esquema de direccionamiento diferente, adapta los comandos sustituyendo las IPs de ejemplo por las de tu topología real. Consulta con tu instructor antes de comenzar.
+
 
 ### Preparación del entorno
 
@@ -110,30 +102,41 @@ La topología que utilizarás tiene la siguiente estructura lógica:
 2. Si aparece el mensaje de configuración inicial (`Would you like to enter the initial configuration dialog?`), escribe `no` y presiona **Enter**.
 3. Ingresa al modo privilegiado:
    ```
-   Router> enable
+   R1> enable
    ```
 4. Verifica la tabla de ruteo actual:
    ```
-   Router# show ip route
+   R1# show ip route
    ```
 5. Verifica el estado de las interfaces:
    ```
-   Router# show ip interface brief
+   R1# show ip interface brief
    ```
 6. Prueba conectividad hacia el ISP:
    ```
-   Router# ping 203.0.113.2
+   R1# ping 203.0.113.2
    ```
 
 #### Salida esperada — `show ip route`
 
 ```
-Codes: C - connected, S - static, I - IGRP, R - RIP, ...
+Codes: L - local, C - connected, S - static, R - RIP, M - mobile, B - BGP
+       D - EIGRP, EX - EIGRP external, O - OSPF, IA - OSPF inter area
+       N1 - OSPF NSSA external type 1, N2 - OSPF NSSA external type 2
+       E1 - OSPF external type 1, E2 - OSPF external type 2, E - EGP
+       i - IS-IS, L1 - IS-IS level-1, L2 - IS-IS level-2, ia - IS-IS inter area
+       * - candidate default, U - per-user static route, o - ODR
+       P - periodic downloaded static route
 
-Gateway of last resort is not set
+Gateway of last resort is 0.0.0.0 to network 0.0.0.0
 
-C    192.168.10.0/24 is directly connected, FastEthernet0/0
-C    203.0.113.0/30  is directly connected, FastEthernet0/1
+     192.168.10.0/24 is variably subnetted, 2 subnets, 2 masks
+C       192.168.10.0/24 is directly connected, GigabitEthernet0/0
+L       192.168.10.1/32 is directly connected, GigabitEthernet0/0
+     203.0.113.0/24 is variably subnetted, 2 subnets, 2 masks
+C       203.0.113.0/30 is directly connected, GigabitEthernet0/1
+L       203.0.113.1/32 is directly connected, GigabitEthernet0/1
+S*   0.0.0.0/0 is directly connected, GigabitEthernet0/1
 ```
 
 > Observa los códigos `C` (connected): estas son rutas directamente conectadas, el equivalente a las entradas automáticas que el router genera al tener interfaces activas. Recuerda de la Lección 4.1 que el router aplica *coincidencia más larga* al consultar esta tabla.
@@ -141,9 +144,9 @@ C    203.0.113.0/30  is directly connected, FastEthernet0/1
 #### Salida esperada — `show ip interface brief`
 
 ```
-Interface         IP-Address      OK? Method Status    Protocol
-FastEthernet0/0   192.168.10.1    YES manual up        up
-FastEthernet0/1   203.0.113.1     YES manual up        up
+Interface              IP-Address      OK? Method Status                Protocol 
+GigabitEthernet0/0     192.168.10.1    YES manual up                    up 
+GigabitEthernet0/1     203.0.113.1     YES manual up                    up
 ```
 
 #### Verificación
@@ -164,64 +167,64 @@ FastEthernet0/1   203.0.113.1     YES manual up        up
 
 1. Desde el modo privilegiado, entra al modo de configuración global:
    ```
-   Router# configure terminal
+   R1# configure terminal
    ```
 
 2. **Excluye las primeras 10 direcciones** del rango para uso de infraestructura (gateway, servidores, impresoras, etc.):
    ```
-   Router(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.10
+   R1(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.10
    ```
 
 3. **Excluye también la IP del servidor interno** (que tiene dirección estática):
    ```
-   Router(config)# ip dhcp excluded-address 192.168.10.100
+   R1(config)# ip dhcp excluded-address 192.168.10.100
    ```
 
 4. **Crea el pool DHCP** con el nombre `LAN_POOL`:
    ```
-   Router(config)# ip dhcp pool LAN_POOL
+   R1(config)# ip dhcp pool LAN_POOL
    ```
 
 5. Define la **red** que el pool administrará:
    ```
-   Router(dhcp-config)# network 192.168.10.0 255.255.255.0
+   R1(dhcp-config)# network 192.168.10.0 255.255.255.0
    ```
 
 6. Define el **default-gateway** que recibirán los clientes:
    ```
-   Router(dhcp-config)# default-router 192.168.10.1
+   R1(dhcp-config)# default-router 192.168.10.1
    ```
 
 7. Define el **servidor DNS** que recibirán los clientes:
    ```
-   Router(dhcp-config)# dns-server 8.8.8.8
+   R1(dhcp-config)# dns-server 8.8.8.8
    ```
 
 8. (Opcional pero recomendado) Define el **tiempo de concesión** en días/horas/minutos:
    ```
-   Router(dhcp-config)# lease 0 1 0
+   R1(dhcp-config)# lease 0 1 0
    ```
    > Esto configura una concesión de 0 días, 1 hora, 0 minutos. En entornos de producción se usan valores más largos (ej. 1 día).
 
 9. Sal del modo de configuración DHCP:
    ```
-   Router(dhcp-config)# exit
-   Router(config)# exit
+   R1(dhcp-config)# exit
+   R1(config)# exit
    ```
 
 10. **Guarda la configuración** en memoria no volátil:
     ```
-    Router# write memory
+    R1# write memory
     ```
     o equivalentemente:
     ```
-    Router# copy running-config startup-config
+    R1# copy running-config startup-config
     ```
 
 #### Verificación inmediata del pool
 
 ```
-Router# show ip dhcp pool
+R1# show ip dhcp pool
 ```
 
 **Salida esperada:**
@@ -250,7 +253,7 @@ Pool LAN_POOL :
 #### Verificación en el router
 
 ```
-Router# show ip dhcp binding
+R1# show ip dhcp binding
 ```
 
 **Salida esperada:**
@@ -283,41 +286,41 @@ IP address       Client-ID/              Lease expiration        Type
 
 1. Entra al modo de configuración global:
    ```
-   Router# configure terminal
+   R1# configure terminal
    ```
 
 2. **Define las interfaces inside y outside** de NAT. Esta distinción es esencial: el router necesita saber qué lado es la red privada y qué lado es Internet.
 
    Interfaz LAN (lado privado):
    ```
-   Router(config)# interface FastEthernet0/0
-   Router(config-if)# ip nat inside
-   Router(config-if)# exit
+   R1(config)# interface GigabitEthernet0/0
+   R1(config-if)# ip nat inside
+   R1(config-if)# exit
    ```
 
    Interfaz WAN (lado público):
    ```
-   Router(config)# interface FastEthernet0/1
-   Router(config-if)# ip nat outside
-   Router(config-if)# exit
+   R1(config)# interface GigabitEthernet0/1
+   R1(config-if)# ip nat outside
+   R1(config-if)# exit
    ```
 
 3. **Crea la traducción NAT estática** para el servidor:
    ```
-   Router(config)# ip nat inside source static 192.168.10.100 203.0.113.5
+   R1(config)# ip nat inside source static 192.168.10.100 203.0.113.5
    ```
 
-   > Esto le dice al router: "Cualquier paquete que llegue por Fa0/1 con destino `203.0.113.5` debe ser redirigido a `192.168.10.100`, y viceversa."
+   > Esto le dice al router: "Cualquier paquete que llegue por Gi0/1 con destino `203.0.113.5` debe ser redirigido a `192.168.10.100`, y viceversa."
 
 4. Sal del modo de configuración:
    ```
-   Router(config)# exit
+   R1(config)# exit
    ```
 
 #### Verificación de NAT estático
 
 ```
-Router# show ip nat translations
+R1# show ip nat translations
 ```
 
 **Salida esperada (antes de cualquier tráfico):**
@@ -345,7 +348,7 @@ Pro Inside global      Inside local       Outside local      Outside global
 
 6. Después del ping, vuelve al router y ejecuta nuevamente:
    ```
-   Router# show ip nat translations
+   R1# show ip nat translations
    ```
 
    **Salida esperada (con tráfico activo):**
@@ -367,7 +370,7 @@ Pro Inside global      Inside local       Outside local      Outside global
 
 ### Paso 4 — Configuración de PAT (NAT con Sobrecarga)
 
-**Objetivo:** Implementar PAT para que PC0 y PC1 (y cualquier otro host de la LAN) compartan la IP pública `203.0.113.1` (la IP de Fa0/1) para acceder a Internet, usando números de puerto para distinguir las sesiones.
+**Objetivo:** Implementar PAT para que PC0 y PC1 (y cualquier otro host de la LAN) compartan la IP pública `203.0.113.1` (la IP de Gi0/1) para acceder a Internet, usando números de puerto para distinguir las sesiones.
 
 > **Concepto clave:** PAT (Port Address Translation), también llamado NAT con sobrecarga (*overload*), es la tecnología que permite que cientos de dispositivos compartan una sola IP pública. El router mantiene una tabla que asocia cada conexión interna con un puerto único en la IP pública. Esto es fundamental para entender por qué IPv4 no se agotó tan rápido como se temía en los años 90.
 
@@ -375,23 +378,23 @@ Pro Inside global      Inside local       Outside local      Outside global
 
 1. **Crea una lista de acceso (ACL)** que identifique el tráfico de la red interna que debe ser traducido:
    ```
-   Router# configure terminal
-   Router(config)# access-list 1 permit 192.168.10.0 0.0.0.255
+   R1# configure terminal
+   R1(config)# access-list 1 permit 192.168.10.0 0.0.0.255
    ```
 
    > La ACL número `1` es una lista de acceso estándar. El wildcard `0.0.0.255` es el inverso de la máscara `255.255.255.0` y significa "cualquier host en la red `192.168.10.0/24`".
 
 2. **Configura PAT usando la interfaz de salida** como IP pública (de esta forma, si la IP pública cambia, la configuración sigue siendo válida):
    ```
-   Router(config)# ip nat inside source list 1 interface FastEthernet0/1 overload
+   R1(config)# ip nat inside source list 1 interface GigabitEthernet0/1  overload
    ```
 
    > La palabra clave `overload` es lo que activa PAT. Sin ella, sería NAT dinámico normal (un mapeo uno a uno por cada IP disponible en el pool).
 
 3. Sal y guarda:
    ```
-   Router(config)# exit
-   Router# write memory
+   R1(config)# exit
+   R1# write memory
    ```
 
 #### Generación de tráfico para verificar PAT
@@ -402,7 +405,7 @@ Pro Inside global      Inside local       Outside local      Outside global
 
 7. Vuelve al router y ejecuta:
    ```
-   Router# show ip nat translations
+   R1# show ip nat translations
    ```
 
 **Salida esperada con PAT activo:**
@@ -418,16 +421,16 @@ tcp 203.0.113.1:1026     192.168.10.12:1025   8.8.8.8:80         8.8.8.8:80
 
 8. Para ver también las estadísticas de NAT:
    ```
-   Router# show ip nat statistics
+   R1# show ip nat statistics
    ```
 
    **Salida esperada:**
    ```
    Total active translations: 3 (1 static, 2 dynamic; 2 extended)
    Outside interfaces:
-     FastEthernet0/1
+     GigabitEthernet0/1
    Inside interfaces:
-     FastEthernet0/0
+     GigabitEthernet0/0 
    Hits: 24  Misses: 0
    ...
    ```
@@ -540,13 +543,13 @@ En tu archivo de respuestas `Lab04_respuestas_[TuNombre].txt`, responde las sigu
 Una vez completados todos los pasos, ejecuta la siguiente secuencia de verificación completa en el router:
 
 ```
-Router# show ip dhcp binding
-Router# show ip dhcp pool
-Router# show ip nat translations
-Router# show ip nat statistics
-Router# show ip interface brief
-Router# show running-config | section dhcp
-Router# show running-config | section nat
+R1# show ip dhcp binding
+R1# show ip dhcp pool
+R1# show ip nat translations
+R1# show ip nat statistics
+R1# show ip interface brief
+R1# show running-config | section dhcp
+R1# show running-config | section nat
 ```
 
 ### Lista de verificación final
@@ -582,20 +585,20 @@ ip dhcp pool LAN_POOL
 !
 ...
 !
-interface FastEthernet0/0
+interface GigabitEthernet0/0 
  ip address 192.168.10.1 255.255.255.0
  ip nat inside
  duplex auto
  speed auto
 !
-interface FastEthernet0/1
+interface GigabitEthernet0/1 
  ip address 203.0.113.1 255.255.255.252
  ip nat outside
  duplex auto
  speed auto
 !
 ip nat inside source static 192.168.10.100 203.0.113.5
-ip nat inside source list 1 interface FastEthernet0/1 overload
+ip nat inside source list 1 interface GigabitEthernet0/1  overload
 !
 access-list 1 permit 192.168.10.0 0.0.0.255
 !
@@ -604,6 +607,7 @@ access-list 1 permit 192.168.10.0 0.0.0.255
 ---
 
 ## Solución de Problemas
+Descarga el archivo .pkt aqui [Lab-4  Solucion de problemas.zip](https://github.com/user-attachments/files/30797315/Lab-4.Solucion.de.problemas.zip)
 
 ### Problema 1 — Los hosts no reciben dirección IP por DHCP
 
@@ -611,27 +615,27 @@ access-list 1 permit 192.168.10.0 0.0.0.255
 PC0 o PC1 muestran la dirección `0.0.0.0` o una IP APIPA (`169.254.x.x`) después de seleccionar DHCP. El campo Gateway también aparece vacío.
 
 **Causa probable:**
-El pool DHCP excluye incorrectamente todo el rango de la red, o la interfaz `Fa0/0` del router no tiene configurado `ip nat inside` (aunque esto no afecta DHCP directamente, indica que la interfaz puede estar mal configurada). La causa más común en Packet Tracer es que el pool DHCP tiene un error tipográfico en el nombre de red o la máscara.
+El pool DHCP excluye incorrectamente todo el rango de la red, o la interfaz `Gi0/0` del router no tiene configurado `ip nat inside` (aunque esto no afecta DHCP directamente, indica que la interfaz puede estar mal configurada). La causa más común en Packet Tracer es que el pool DHCP tiene un error tipográfico en el nombre de red o la máscara.
 
 **Diagnóstico y solución:**
 
 1. Verifica la configuración del pool:
    ```
-   Router# show ip dhcp pool
-   Router# show running-config | section dhcp
+   R1# show ip dhcp pool
+   R1# show running-config | section dhcp
    ```
 2. Confirma que el rango de exclusión no cubre toda la red. Si excluiste `192.168.10.1 192.168.10.254`, no quedan IPs disponibles.
 3. Si hay un error, elimina el pool y recréalo:
    ```
-   Router# configure terminal
-   Router(config)# no ip dhcp pool LAN_POOL
-   Router(config)# no ip dhcp excluded-address 192.168.10.1 192.168.10.10
-   Router(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.10
-   Router(config)# ip dhcp pool LAN_POOL
-   Router(dhcp-config)# network 192.168.10.0 255.255.255.0
-   Router(dhcp-config)# default-router 192.168.10.1
-   Router(dhcp-config)# dns-server 8.8.8.8
-   Router(dhcp-config)# exit
+   R1# configure terminal
+   R1(config)# no ip dhcp pool LAN_POOL
+   R1(config)# no ip dhcp excluded-address 192.168.10.1 192.168.10.10
+   R1(config)# ip dhcp excluded-address 192.168.10.1 192.168.10.10
+   R1(config)# ip dhcp pool LAN_POOL
+   R1(dhcp-config)# network 192.168.10.0 255.255.255.0
+   R1(dhcp-config)# default-router 192.168.10.1
+   R1(dhcp-config)# dns-server 8.8.8.8
+   R1(dhcp-config)# exit
    ```
 4. En PC0, cambia a **Static** y vuelve a **DHCP** para forzar una nueva solicitud DHCP.
 5. Verifica con `show ip dhcp binding` que aparezcan las asignaciones.
@@ -650,7 +654,7 @@ Existen tres causas frecuentes: (a) la ACL número 1 no coincide con el tráfico
 
 1. Verifica que la ACL existe y es correcta:
    ```
-   Router# show access-lists
+   R1# show access-lists
    ```
    Debe mostrar:
    ```
@@ -660,29 +664,29 @@ Existen tres causas frecuentes: (a) la ACL número 1 no coincide con el tráfico
 
 2. Verifica que existe una ruta predeterminada (necesaria para que el router sepa cómo llegar a `8.8.8.8`):
    ```
-   Router# show ip route
+   R1# show ip route
    ```
    Debe existir una línea con `S* 0.0.0.0/0`. Si no existe, agrégala:
    ```
-   Router(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.2
+   R1(config)# ip route 0.0.0.0 0.0.0.0 203.0.113.2
    ```
    > Recuerda de la Lección 4.1: la ruta `0.0.0.0/0` es el *gateway de último recurso*. Sin ella, el router no sabe cómo llegar a destinos fuera de sus redes directamente conectadas.
 
 3. Verifica los roles NAT en las interfaces:
    ```
-   Router# show ip interface FastEthernet0/0 | include NAT
-   Router# show ip interface FastEthernet0/1 | include NAT
+   R1r# show ip interface GigabitEthernet0/0 | include NAT
+   R1# show ip interface GigabitEthernet0/1  | include NAT
    ```
-   Fa0/0 debe decir `Inbound access list is not set` y estar marcada como `inside`; Fa0/1 como `outside`.
+   Gi0/0 debe decir `Inbound access list is not set` y estar marcada como `inside`; Gi0/1 como `outside`.
 
 4. Si el comando PAT no está presente, agrégalo:
    ```
-   Router(config)# ip nat inside source list 1 interface FastEthernet0/1 overload
+   R1(config)# ip nat inside source list 1 interface GigabitEthernet0/1  overload
    ```
 
 5. Genera tráfico nuevamente desde PC0 y verifica:
    ```
-   Router# show ip nat translations
+   R1# show ip nat translations
    ```
 
 ---
