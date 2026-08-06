@@ -78,14 +78,9 @@ Antes de comenzar, confirma que Wireshark está correctamente instalado ejecutan
 "C:\Program Files\Wireshark\Wireshark.exe" --version
 ```
 
-**macOS / Linux (Terminal):**
-```bash
-wireshark --version
+** Linux (Terminal):**
 ```
-
-**Salida esperada (ejemplo):**
-```
-Wireshark 4.2.x (Git commit xxxxxxxx)
+sudo apt update && sudo apt install wireshark
 ```
 
 Si el comando no es reconocido, verifica que Wireshark esté instalado y que su directorio esté en el PATH del sistema.
@@ -116,15 +111,8 @@ Si el comando no es reconocido, verifica que Wireshark esté instalado y que su 
 
 Deberías ver una lista similar a esta (los nombres varían por sistema operativo):
 
-```
-Interfaces disponibles en Wireshark:
-┌─────────────────────────────────────────────┐
-│ Ethernet (con actividad ≈≈≈≈≈)              │
-│ Wi-Fi (con actividad ≈≈≈≈≈≈≈≈)             │
-│ Loopback (127.0.0.1) (sin actividad ——)     │
-│ Bluetooth Network (sin actividad ——)        │
-└─────────────────────────────────────────────┘
-```
+<img width="1542" height="599" alt="Lab1-img 1" src="https://github.com/user-attachments/assets/f8463ae3-f079-42b7-ba5c-72cc59c93cd9" />
+
 
 #### Verificación
 
@@ -154,7 +142,7 @@ Interfaces disponibles en Wireshark:
    ping 8.8.8.8 -n 4
    ```
 
-   **macOS / Linux (Terminal):**
+   **Linux (Terminal):**
    ```bash
    ping -c 4 8.8.8.8
    ```
@@ -181,7 +169,7 @@ Estadísticas de ping para 8.8.8.8:
     Paquetes: enviados = 4, recibidos = 4, perdidos = 0 (0% perdidos)
 ```
 
-**macOS / Linux:**
+**Linux:**
 ```
 PING 8.8.8.8 (8.8.8.8): 56 data bytes
 64 bytes from 8.8.8.8: icmp_seq=0 ttl=118 time=14.5 ms
@@ -624,7 +612,7 @@ Al finalizar la práctica, realiza los siguientes pasos para dejar el entorno or
    cls
    ```
 
-   **macOS / Linux:**
+   **Linux:**
    ```bash
    clear
    ```
