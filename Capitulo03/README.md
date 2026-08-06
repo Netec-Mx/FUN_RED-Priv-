@@ -561,6 +561,7 @@ C:\> ping 192.168.10.10
 ---
 
 > ⚠️ **Instrucciones para el instructor:** Antes de entregar esta práctica a los estudiantes, introduce los siguientes errores deliberados en el archivo `.pkt`. Si el estudiante trabaja de forma autónoma, puede introducirlos él mismo y luego resolverlos como ejercicio.
+O bien descarga el Archivo .pkt aqui  [Practica3_LAN_errores.zip](https://github.com/user-attachments/files/30797466/Practica3_LAN_errores.zip)
 
 ---
 
