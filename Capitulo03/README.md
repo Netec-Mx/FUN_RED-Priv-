@@ -155,6 +155,7 @@ Antes de comenzar, verifica que Packet Tracer abre correctamente:
        /  |  |  \      \  \
     PC-1 PC-2 PC-3 PC-4  Laptop-1  Laptop-2
 ```
+<img width="991" height="531" alt="1 Topologia Inicial" src="https://github.com/user-attachments/assets/77db59b9-2e53-4aef-9f29-f0091af1db77" />
 
 ---
 
@@ -183,8 +184,8 @@ Antes de comenzar, verifica que Packet Tracer abre correctamente:
    - **PC-2** FastEthernet0 → **SW1** FastEthernet0/2
    - **PC-3** FastEthernet0 → **SW1** FastEthernet0/3
    - **PC-4** FastEthernet0 → **SW1** FastEthernet0/4
-4. Conecta el switch al router: **SW1** GigabitEthernet0/1 → **R1** FastEthernet0/0 (cable **Copper Straight-Through**).
-5. Conecta el AP al router: **AP1** puerto 0 (Internet) → **R1** FastEthernet0/1 (cable **Copper Straight-Through**).
+4. Conecta el switch al router: **SW1** GigabitEthernet0/1 → **R1** GigabitEthernet0/0 (cable **Copper Straight-Through**).
+5. Conecta el AP al router: **AP1** puerto 0 (Internet) → **R1** GigabitEthernet0/0 (cable **Copper Straight-Through**).
 6. Las laptops se asociarán al AP de forma inalámbrica en el Paso A4; **no** las conectes con cable ahora.
 7. Guarda el archivo: **Ctrl + S**.
 
@@ -221,20 +222,20 @@ Router(config)# hostname R1
 R1(config)#
 ```
 
-6. Configura la interfaz **FastEthernet0/0** (segmento cableado, hacia SW1):
+6. Configura la interfaz **GigabitEthernet0/0** (segmento cableado, hacia SW1):
 
 ```
-R1(config)# interface FastEthernet0/0
+R1(config)# interface GigabitEthernet0/0
 R1(config-if)# description Enlace hacia SW1 - Segmento 192.168.10.0/24
 R1(config-if)# ip address 192.168.10.1 255.255.255.0
 R1(config-if)# no shutdown
 R1(config-if)# exit
 ```
 
-7. Configura la interfaz **FastEthernet0/1** (segmento inalámbrico, hacia AP1):
+7. Configura la interfaz **GigabitEthernet0/1** (segmento inalámbrico, hacia AP1):
 
 ```
-R1(config)# interface FastEthernet0/1
+R1(config)# interface GigabitEthernet0/1
 R1(config-if)# description Enlace hacia AP1 - Segmento 192.168.20.0/24
 R1(config-if)# ip address 192.168.20.1 255.255.255.0
 R1(config-if)# no shutdown
@@ -259,8 +260,8 @@ R1# copy running-config startup-config
 Cuando ejecutes `no shutdown` en cada interfaz, deberías ver un mensaje similar a:
 
 ```
-%LINK-5-CHANGED: Interface FastEthernet0/0, changed state to up
-%LINEPROTO-5-UPDOWN: Line protocol on Interface FastEthernet0/0, changed state to up
+%LINK-5-CHANGED: Interface GigabitEthernet0/0, changed state to up
+%LINEPROTO-5-UPDOWN: Line protocol on Interface GigabitEthernet0/0, changed state to up
 ```
 
 Después de guardar, el mensaje de confirmación es:
@@ -282,8 +283,8 @@ La salida debe mostrar ambas interfaces con estado `up/up` y sus IPs asignadas:
 
 ```
 Interface              IP-Address      OK? Method Status                Protocol
-FastEthernet0/0        192.168.10.1    YES manual up                    up
-FastEthernet0/1        192.168.20.1    YES manual up                    up
+GigabitEthernet0/0        192.168.10.1    YES manual up                    up
+GigabitEthernet0/1       192.168.20.1    YES manual up                    up
 ```
 
 > ✅ **Indicador visual:** Los puntos de los cables conectados a R1 deben cambiar a **verde** en el lienzo de Packet Tracer.
@@ -409,6 +410,8 @@ FastEthernet0 Connection:
 5. Deja la autenticación en **Disabled** (sin contraseña) para simplificar la práctica.
 6. Cierra la ventana.
 
+<img width="1126" height="432" alt="PasoA 6" src="https://github.com/user-attachments/assets/5f8a79f8-0fa5-4540-91a3-238ca133797f" />
+
 **Instrucciones — Configurar Laptop-1:**
 
 1. Haz doble clic en **Laptop-1**.
@@ -420,6 +423,9 @@ FastEthernet0 Connection:
 4. Selecciona la pestaña **Connect** → haz clic en **Refresh**.
 5. Selecciona la red `OficinaLAN-WiFi` y haz clic en **Connect**.
 6. Cierra la ventana de PC Wireless.
+
+<img width="1126" height="432" alt="PasoA 6" src="https://github.com/user-attachments/assets/b4f522e7-48f4-4871-8f14-55de09f84749" />
+
 7. Ve a **Desktop → IP Configuration** → **Static**:
 
 | Campo | Valor para Laptop-1 |
@@ -555,6 +561,7 @@ C:\> ping 192.168.10.10
 ---
 
 > ⚠️ **Instrucciones para el instructor:** Antes de entregar esta práctica a los estudiantes, introduce los siguientes errores deliberados en el archivo `.pkt`. Si el estudiante trabaja de forma autónoma, puede introducirlos él mismo y luego resolverlos como ejercicio.
+O bien descarga el Archivo .pkt aqui  [Practica3_LAN_errores.zip](https://github.com/user-attachments/files/30797466/Practica3_LAN_errores.zip)
 
 ---
 
@@ -571,7 +578,7 @@ C:\> ping 192.168.10.10
 
 ```
 R1# configure terminal
-R1(config)# interface FastEthernet0/1
+R1(config)# interface GigabitEthernet0/1
 R1(config-if)# shutdown
 R1(config-if)# exit
 R1(config)# exit
@@ -622,19 +629,19 @@ Request timeout for icmp_seq 1
 R1# show ip interface brief
 ```
 
-Observa que `FastEthernet0/1` aparece como `administratively down`:
+Observa que `GigabitEthernet0/1` aparece como `administratively down`:
 
 ```
 Interface              IP-Address      OK? Method Status                Protocol
-FastEthernet0/0        192.168.10.1    YES manual up                    up
-FastEthernet0/1        192.168.20.1    YES manual administratively down down
+GigabitEthernet0/0       192.168.10.1    YES manual up                    up
+GigabitEthernet0/1        192.168.20.1    YES manual administratively down down
 ```
 
 4. **Corrección:**
 
 ```
 R1# configure terminal
-R1(config)# interface FastEthernet0/1
+R1(config)# interface GigabitEthernet0/1
 R1(config-if)# no shutdown
 R1(config-if)# exit
 R1(config)# exit
@@ -718,12 +725,12 @@ Ejecuta cada ping y registra el resultado (✅ Éxito / ❌ Fallo) en tu reporte
 | 1 | PC-1 | PC-2 | 192.168.10.11 | ✅ Éxito |
 | 2 | PC-1 | PC-4 | 192.168.10.13 | ✅ Éxito |
 | 3 | PC-2 | SW1 (mgmt) | 192.168.10.2 | ✅ Éxito |
-| 4 | PC-1 | R1 (Fa0/0) | 192.168.10.1 | ✅ Éxito |
+| 4 | PC-1 | R1 (Gi0/0) | 192.168.10.1 | ✅ Éxito |
 | 5 | PC-1 | Laptop-1 | 192.168.20.10 | ✅ Éxito |
 | 6 | PC-3 | Laptop-2 | 192.168.20.11 | ✅ Éxito |
 | 7 | Laptop-1 | Laptop-2 | 192.168.20.11 | ✅ Éxito |
 | 8 | Laptop-2 | PC-4 | 192.168.10.13 | ✅ Éxito |
-| 9 | PC-4 | R1 (Fa0/1) | 192.168.20.1 | ✅ Éxito |
+| 9 | PC-4 | R1 (Gi0/1) | 192.168.20.1 | ✅ Éxito |
 
 ### Verificación Final de la Tabla CAM
 
