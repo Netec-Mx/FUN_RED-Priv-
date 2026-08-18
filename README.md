@@ -4,9 +4,6 @@
 
 Aprenderás los conceptos esenciales de redes, incluidos modelos OSI/TCP-IP, direccionamiento IP, enrutamiento básico y seguridad, con prácticas para configurar y diagnosticar conexiones en entornos domésticos y oficinas pequeñas.
 
-## Estructura
-
-- `CapituloXX/README.md`: guía de laboratorio por capítulo.
 
 ## Lista de laboratorios
 
